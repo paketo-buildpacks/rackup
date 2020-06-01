@@ -2,7 +2,7 @@ package fakes
 
 import "sync"
 
-type Parser struct {
+type GemParser struct {
 	ParseCall struct {
 		sync.Mutex
 		CallCount int
@@ -10,14 +10,14 @@ type Parser struct {
 			Path string
 		}
 		Returns struct {
-			HasMri bool
-			Err    error
+			RackFound bool
+			Err       error
 		}
 		Stub func(string) (bool, error)
 	}
 }
 
-func (f *Parser) Parse(param1 string) (bool, error) {
+func (f *GemParser) Parse(param1 string) (bool, error) {
 	f.ParseCall.Lock()
 	defer f.ParseCall.Unlock()
 	f.ParseCall.CallCount++
@@ -25,5 +25,5 @@ func (f *Parser) Parse(param1 string) (bool, error) {
 	if f.ParseCall.Stub != nil {
 		return f.ParseCall.Stub(param1)
 	}
-	return f.ParseCall.Returns.HasMri, f.ParseCall.Returns.Err
+	return f.ParseCall.Returns.RackFound, f.ParseCall.Returns.Err
 }

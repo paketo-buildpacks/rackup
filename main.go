@@ -8,8 +8,8 @@ import (
 )
 
 func main() {
-	parser := NewGemfileParser()
 	logger := scribe.NewLogger(os.Stdout)
+	parser := NewGemfileLockParser()
 
 	detect := Detect(parser)
 	build := Build(logger)

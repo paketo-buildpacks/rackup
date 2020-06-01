@@ -19,9 +19,9 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 	var (
 		Expect = NewWithT(t).Expect
 
-		workingDir    string
-		gemfileParser *fakes.Parser
-		detect        packit.DetectFunc
+		workingDir        string
+		detect            packit.DetectFunc
+		gemfileLockParser *fakes.GemParser
 	)
 
 	it.Before(func() {
@@ -35,23 +35,22 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 		err = ioutil.WriteFile(filepath.Join(workingDir, "config.ru"), []byte{}, 0644)
 		Expect(err).NotTo(HaveOccurred())
 
-		gemfileParser = &fakes.Parser{}
-		detect = main.Detect(gemfileParser)
+		gemfileLockParser = &fakes.GemParser{}
+
+		detect = main.Detect(gemfileLockParser)
 	})
 
 	it.After(func() {
 		Expect(os.RemoveAll(workingDir)).To(Succeed())
 	})
 
-	context("when the Gemfile lists mri", func() {
-		it.Before(func() {
-			gemfileParser.ParseCall.Returns.HasMri = true
-		})
+	context("when the Gemfile.lock specifies rack", func() {
 		it("detects", func() {
 			result, err := detect(packit.DetectContext{
 				WorkingDir: workingDir,
 			})
 			Expect(err).NotTo(HaveOccurred())
+			Expect(gemfileLockParser.ParseCall.Receives.Path).To(Equal(workingDir))
 			Expect(result.Plan).To(Equal(packit.BuildPlan{
 				Provides: []packit.BuildPlanProvision{},
 				Requires: []packit.BuildPlanRequirement{
@@ -78,9 +77,46 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 		})
 	})
 
-	context("when the workingDir does not have a config.ru", func() {
+	context("when there is no Gemfile.lock and a config.ru file exists", func() {
 		it.Before(func() {
-			gemfileParser.ParseCall.Returns.HasMri = true
+			gemfileLockParser.ParseCall.Returns.RackFound = false
+		})
+
+		it("detects", func() {
+			result, err := detect(packit.DetectContext{
+				WorkingDir: workingDir,
+			})
+			Expect(err).NotTo(HaveOccurred())
+			Expect(gemfileLockParser.ParseCall.Receives.Path).To(Equal(workingDir))
+			Expect(result.Plan).To(Equal(packit.BuildPlan{
+				Provides: []packit.BuildPlanProvision{},
+				Requires: []packit.BuildPlanRequirement{
+					{
+						Name: "gems",
+						Metadata: main.BuildPlanMetadata{
+							Launch: true,
+						},
+					},
+					{
+						Name: "bundler",
+						Metadata: main.BuildPlanMetadata{
+							Launch: true,
+						},
+					},
+					{
+						Name: "mri",
+						Metadata: main.BuildPlanMetadata{
+							Launch: true,
+						},
+					},
+				},
+			}))
+		})
+	})
+
+	context("when the workingDir does not have a config.ru and rack is not somehow specified", func() {
+		it.Before(func() {
+			gemfileLockParser.ParseCall.Returns.RackFound = false
 			Expect(os.Remove(filepath.Join(workingDir, "config.ru"))).To(Succeed())
 		})
 
@@ -89,23 +125,11 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 				WorkingDir: workingDir,
 			})
 			Expect(err).To(MatchError(packit.Fail))
+			Expect(gemfileLockParser.ParseCall.Receives.Path).To(Equal(workingDir))
 		})
 	})
 
 	context("failure cases", func() {
-		context("when the gemfile parser fails", func() {
-			it.Before(func() {
-				gemfileParser.ParseCall.Returns.Err = errors.New("some-error")
-			})
-
-			it("returns an error", func() {
-				_, err := detect(packit.DetectContext{
-					WorkingDir: workingDir,
-				})
-				Expect(err).To(MatchError("failed to parse Gemfile: some-error"))
-			})
-		})
-
 		context("when unable to stat config.ru", func() {
 			it.Before(func() {
 				Expect(os.Chmod(workingDir, 0000)).To(Succeed())
@@ -123,5 +147,21 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 			})
 		})
 
+		context("when parsing Gemfile.lock fails", func() {
+			it.Before(func() {
+				gemfileLockParser.ParseCall.Returns.Err = errors.New("failed to parse Gemfile.lock")
+			})
+
+			it.After(func() {
+				Expect(os.Chmod(workingDir, os.ModePerm)).To(Succeed())
+			})
+
+			it("returns an error", func() {
+				_, err := detect(packit.DetectContext{
+					WorkingDir: workingDir,
+				})
+				Expect(err).To(MatchError("failed to parse Gemfile.lock"))
+			})
+		})
 	})
 }
