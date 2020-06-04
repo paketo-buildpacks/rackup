@@ -57,10 +57,13 @@ func testSinatraApp(t *testing.T, context spec.G, it spec.S) {
 				Execute(name, filepath.Join("testdata", "sinatra_app"))
 			Expect(err).NotTo(HaveOccurred(), logs.String())
 
-			container, err = docker.Container.Run.WithEnv(map[string]string{"PORT": "9292"}).Execute(image.ID)
+			container, err = docker.Container.Run.WithEnv(map[string]string{"PORT": "8088"}).Execute(image.ID)
 			Expect(err).NotTo(HaveOccurred())
 
 			Eventually(container).Should(BeAvailable(), ContainerLogs(container.ID))
+
+			_, exists := container.Ports["8088"]
+			Expect(exists).To(BeTrue())
 
 			response, err := http.Get(fmt.Sprintf("http://localhost:%s", container.HostPort()))
 			Expect(err).NotTo(HaveOccurred())
@@ -78,7 +81,7 @@ func testSinatraApp(t *testing.T, context spec.G, it spec.S) {
 			Expect(logs).To(ContainLines(
 				fmt.Sprintf("Rackup Buildpack %s", buildpackVersion),
 				"  Writing start command",
-				"    bundle exec rackup",
+				"    `bundle exec rackup -p ${PORT}`",
 			))
 		})
 	})

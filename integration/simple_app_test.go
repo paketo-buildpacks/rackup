@@ -78,7 +78,7 @@ func testSimpleApp(t *testing.T, context spec.G, it spec.S) {
 			Expect(logs).To(ContainLines(
 				fmt.Sprintf("Rackup Buildpack %s", buildpackVersion),
 				"  Writing start command",
-				"    bundle exec rackup",
+				"    `bundle exec rackup -p ${PORT}`",
 			))
 		})
 	})
