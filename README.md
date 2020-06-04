@@ -1,15 +1,12 @@
-[WORK IN PROGRESS]
+# Rackup Cloud Native Buildpack
 
-# Rack Cloud Native Buildpack
-
-The Rack CNB sets the start command for a given rack-compliant ruby application.
-
+The Rackup CNB sets the start command for a given rack-compliant ruby application.
 
 ## Integration
 
 This CNB writes a start command, so there's currently no scenario we can
 imagine that you would need to require it as dependency. If a user likes to
-include some other functionality, it can be done independent of the Rack CNB
+include some other functionality, it can be done independent of the Rackup CNB
 without requiring a dependency of it.
 
 To package this buildpack for consumption:
