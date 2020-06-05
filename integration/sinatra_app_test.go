@@ -81,7 +81,7 @@ func testSinatraApp(t *testing.T, context spec.G, it spec.S) {
 			Expect(logs).To(ContainLines(
 				fmt.Sprintf("Rackup Buildpack %s", buildpackVersion),
 				"  Writing start command",
-				"    `bundle exec rackup -p ${PORT}`",
+				`    bundle exec rackup -p "${PORT:-9292}"`,
 			))
 		})
 	})
