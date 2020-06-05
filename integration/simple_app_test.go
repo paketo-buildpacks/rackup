@@ -48,38 +48,79 @@ func testSimpleApp(t *testing.T, context spec.G, it spec.S) {
 			Expect(docker.Volume.Remove.Execute(occam.CacheVolumeNames(name))).To(Succeed())
 		})
 
-		it("creates a working OCI image with a rackup start command", func() {
-			var err error
-			var logs fmt.Stringer
-			image, logs, err = pack.WithNoColor().Build.
-				WithBuildpacks(mriBuildpack, bundlerBuildpack, bundleInstallBuildpack, rackupBuildpack).
-				WithNoPull().
-				Execute(name, filepath.Join("testdata", "simple_app"))
-			Expect(err).NotTo(HaveOccurred(), logs.String())
+		context("a container port is specified", func() {
+			it("creates a working OCI image with a rackup start command", func() {
+				var err error
+				var logs fmt.Stringer
+				image, logs, err = pack.WithNoColor().Build.
+					WithBuildpacks(mriBuildpack, bundlerBuildpack, bundleInstallBuildpack, rackupBuildpack).
+					WithNoPull().
+					Execute(name, filepath.Join("testdata", "simple_app"))
+				Expect(err).NotTo(HaveOccurred(), logs.String())
 
-			container, err = docker.Container.Run.WithEnv(map[string]string{"PORT": "9292"}).Execute(image.ID)
-			Expect(err).NotTo(HaveOccurred())
+				container, err = docker.Container.Run.WithEnv(map[string]string{"PORT": "8088"}).Execute(image.ID)
+				Expect(err).NotTo(HaveOccurred())
 
-			Eventually(container).Should(BeAvailable(), ContainerLogs(container.ID))
+				Eventually(container).Should(BeAvailable(), ContainerLogs(container.ID))
 
-			response, err := http.Get(fmt.Sprintf("http://localhost:%s", container.HostPort()))
-			Expect(err).NotTo(HaveOccurred())
-			defer response.Body.Close()
+				_, exists := container.Ports["8088"]
+				Expect(exists).To(BeTrue())
 
-			Expect(response.StatusCode).To(Equal(http.StatusOK))
+				response, err := http.Get(fmt.Sprintf("http://localhost:%s", container.HostPort()))
+				Expect(err).NotTo(HaveOccurred())
+				defer response.Body.Close()
 
-			content, err := ioutil.ReadAll(response.Body)
-			Expect(err).NotTo(HaveOccurred())
-			Expect(string(content)).To(ContainSubstring("Hello world!"))
+				Expect(response.StatusCode).To(Equal(http.StatusOK))
 
-			buildpackVersion, err := GetGitVersion()
-			Expect(err).ToNot(HaveOccurred())
+				content, err := ioutil.ReadAll(response.Body)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(string(content)).To(ContainSubstring("Hello world!"))
 
-			Expect(logs).To(ContainLines(
-				fmt.Sprintf("Rackup Buildpack %s", buildpackVersion),
-				"  Writing start command",
-				"    `bundle exec rackup -p ${PORT}`",
-			))
+				buildpackVersion, err := GetGitVersion()
+				Expect(err).ToNot(HaveOccurred())
+
+				Expect(logs).To(ContainLines(
+					fmt.Sprintf("Rackup Buildpack %s", buildpackVersion),
+					"  Writing start command",
+					`    bundle exec rackup -p "${PORT:-9292}"`,
+				))
+			})
+		})
+
+		context("no container port is specified", func() {
+			it("creates a working OCI image with a rackup start command", func() {
+				var err error
+				var logs fmt.Stringer
+				image, logs, err = pack.WithNoColor().Build.
+					WithBuildpacks(mriBuildpack, bundlerBuildpack, bundleInstallBuildpack, rackupBuildpack).
+					WithNoPull().
+					Execute(name, filepath.Join("testdata", "simple_app"))
+				Expect(err).NotTo(HaveOccurred(), logs.String())
+
+				container, err = docker.Container.Run.Execute(image.ID)
+				Expect(err).NotTo(HaveOccurred())
+
+				Eventually(container).Should(BeAvailable(), ContainerLogs(container.ID))
+
+				response, err := http.Get(fmt.Sprintf("http://localhost:%s", container.HostPort()))
+				Expect(err).NotTo(HaveOccurred())
+				defer response.Body.Close()
+
+				Expect(response.StatusCode).To(Equal(http.StatusOK))
+
+				content, err := ioutil.ReadAll(response.Body)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(string(content)).To(ContainSubstring("Hello world!"))
+
+				buildpackVersion, err := GetGitVersion()
+				Expect(err).ToNot(HaveOccurred())
+
+				Expect(logs).To(ContainLines(
+					fmt.Sprintf("Rackup Buildpack %s", buildpackVersion),
+					"  Writing start command",
+					`    bundle exec rackup -p "${PORT:-9292}"`,
+				))
+			})
 		})
 	})
 }

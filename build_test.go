@@ -73,7 +73,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			Processes: []packit.Process{
 				{
 					Type:    "web",
-					Command: "bundle exec rackup -p ${PORT}",
+					Command: `bundle exec rackup -p "${PORT:-9292}"`,
 				},
 			},
 		}))

@@ -10,8 +10,9 @@ func Build(logger scribe.Logger) packit.BuildFunc {
 		logger.Title("%s %s", context.BuildpackInfo.Name, context.BuildpackInfo.Version)
 
 		logger.Process("Writing start command")
-		command := "bundle exec rackup -p ${PORT}"
-		logger.Subprocess("`%s`", command)
+		// 9292 is the default rackup port
+		command := `bundle exec rackup -p "${PORT:-9292}"`
+		logger.Subprocess(command)
 
 		return packit.BuildResult{
 			Processes: []packit.Process{
