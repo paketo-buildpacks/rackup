@@ -1,4 +1,4 @@
-package main_test
+package rackup_test
 
 import (
 	"testing"

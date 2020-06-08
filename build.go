@@ -1,4 +1,4 @@
-package main
+package rackup
 
 import (
 	"github.com/paketo-buildpacks/packit"

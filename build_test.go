@@ -1,4 +1,4 @@
-package main_test
+package rackup_test
 
 import (
 	"bytes"
@@ -8,7 +8,7 @@ import (
 
 	"github.com/paketo-buildpacks/packit"
 	"github.com/paketo-buildpacks/packit/scribe"
-	main "github.com/paketo-community/rackup"
+	"github.com/paketo-community/rackup"
 	"github.com/sclevine/spec"
 
 	. "github.com/onsi/gomega"
@@ -40,7 +40,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		buffer = bytes.NewBuffer(nil)
 		logger := scribe.NewLogger(buffer)
 
-		build = main.Build(logger)
+		build = rackup.Build(logger)
 	})
 
 	it.After(func() {
