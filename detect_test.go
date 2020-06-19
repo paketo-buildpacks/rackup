@@ -1,4 +1,4 @@
-package main_test
+package rackup_test
 
 import (
 	"errors"
@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/paketo-buildpacks/packit"
-	main "github.com/paketo-community/rackup"
+	"github.com/paketo-community/rackup"
 	"github.com/paketo-community/rackup/fakes"
 	"github.com/sclevine/spec"
 
@@ -37,7 +37,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 
 		gemfileLockParser = &fakes.GemParser{}
 
-		detect = main.Detect(gemfileLockParser)
+		detect = rackup.Detect(gemfileLockParser)
 	})
 
 	it.After(func() {
@@ -56,19 +56,19 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 				Requires: []packit.BuildPlanRequirement{
 					{
 						Name: "gems",
-						Metadata: main.BuildPlanMetadata{
+						Metadata: rackup.BuildPlanMetadata{
 							Launch: true,
 						},
 					},
 					{
 						Name: "bundler",
-						Metadata: main.BuildPlanMetadata{
+						Metadata: rackup.BuildPlanMetadata{
 							Launch: true,
 						},
 					},
 					{
 						Name: "mri",
-						Metadata: main.BuildPlanMetadata{
+						Metadata: rackup.BuildPlanMetadata{
 							Launch: true,
 						},
 					},
@@ -93,19 +93,19 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 				Requires: []packit.BuildPlanRequirement{
 					{
 						Name: "gems",
-						Metadata: main.BuildPlanMetadata{
+						Metadata: rackup.BuildPlanMetadata{
 							Launch: true,
 						},
 					},
 					{
 						Name: "bundler",
-						Metadata: main.BuildPlanMetadata{
+						Metadata: rackup.BuildPlanMetadata{
 							Launch: true,
 						},
 					},
 					{
 						Name: "mri",
-						Metadata: main.BuildPlanMetadata{
+						Metadata: rackup.BuildPlanMetadata{
 							Launch: true,
 						},
 					},

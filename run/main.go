@@ -5,14 +5,15 @@ import (
 
 	"github.com/paketo-buildpacks/packit"
 	"github.com/paketo-buildpacks/packit/scribe"
+	"github.com/paketo-community/rackup"
 )
 
 func main() {
 	logger := scribe.NewLogger(os.Stdout)
-	parser := NewGemfileLockParser()
+	parser := rackup.NewGemfileLockParser()
 
-	detect := Detect(parser)
-	build := Build(logger)
-
-	packit.Run(detect, build)
+	packit.Run(
+		rackup.Detect(parser),
+		rackup.Build(logger),
+	)
 }

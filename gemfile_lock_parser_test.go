@@ -1,11 +1,11 @@
-package main_test
+package rackup_test
 
 import (
 	"io/ioutil"
 	"os"
 	"testing"
 
-	main "github.com/paketo-community/rackup"
+	"github.com/paketo-community/rackup"
 	"github.com/sclevine/spec"
 
 	. "github.com/onsi/gomega"
@@ -16,7 +16,7 @@ func testGemfileLockParser(t *testing.T, context spec.G, it spec.S) {
 		Expect = NewWithT(t).Expect
 
 		path   string
-		parser main.GemfileLockParser
+		parser rackup.GemfileLockParser
 	)
 
 	it.Before(func() {
@@ -45,7 +45,7 @@ DEPENDENCIES
 
 		path = file.Name()
 
-		parser = main.NewGemfileLockParser()
+		parser = rackup.NewGemfileLockParser()
 	})
 
 	it.After(func() {
