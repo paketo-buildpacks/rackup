@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -33,7 +34,8 @@ func testSinatraApp(t *testing.T, context spec.G, it spec.S) {
 			image     occam.Image
 			container occam.Container
 
-			name string
+			name   string
+			source string
 		)
 
 		it.Before(func() {
@@ -46,15 +48,19 @@ func testSinatraApp(t *testing.T, context spec.G, it spec.S) {
 			Expect(docker.Container.Remove.Execute(container.ID)).To(Succeed())
 			Expect(docker.Image.Remove.Execute(image.ID)).To(Succeed())
 			Expect(docker.Volume.Remove.Execute(occam.CacheVolumeNames(name))).To(Succeed())
+			Expect(os.RemoveAll(source)).To(Succeed())
 		})
 
 		it("creates a working OCI image with a rackup start command", func() {
 			var err error
+			source, err = occam.Source(filepath.Join("testdata", "sinatra_app"))
+			Expect(err).NotTo(HaveOccurred())
+
 			var logs fmt.Stringer
 			image, logs, err = pack.WithNoColor().Build.
 				WithBuildpacks(mriBuildpack, bundlerBuildpack, bundleInstallBuildpack, rackupBuildpack).
 				WithNoPull().
-				Execute(name, filepath.Join("testdata", "sinatra_app"))
+				Execute(name, source)
 			Expect(err).NotTo(HaveOccurred(), logs.String())
 
 			container, err = docker.Container.Run.WithEnv(map[string]string{"PORT": "8088"}).Execute(image.ID)
@@ -76,7 +82,7 @@ func testSinatraApp(t *testing.T, context spec.G, it spec.S) {
 			Expect(string(content)).To(ContainSubstring("Hello world!"))
 
 			buildpackVersion, err := GetGitVersion()
-			Expect(err).ToNot(HaveOccurred())
+			Expect(err).NotTo(HaveOccurred())
 
 			Expect(logs).To(ContainLines(
 				fmt.Sprintf("Rackup Buildpack %s", buildpackVersion),
