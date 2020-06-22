@@ -45,20 +45,23 @@ func TestIntegration(t *testing.T) {
 	bundleInstallBuildpack, err = dagger.GetLatestCommunityBuildpack("paketo-community", "bundle-install")
 	Expect(err).ToNot(HaveOccurred())
 
-	defer func() {
-		dagger.DeleteBuildpack(rackupBuildpack)
-		dagger.DeleteBuildpack(mriBuildpack)
-		dagger.DeleteBuildpack(bundlerBuildpack)
-		dagger.DeleteBuildpack(bundleInstallBuildpack)
-	}()
-
 	SetDefaultEventuallyTimeout(10 * time.Second)
 
 	suite := spec.New("Integration", spec.Parallel(), spec.Report(report.Terminal{}))
 	suite("SimpleApp", testSimpleApp)
 	suite("SinatraApp", testSinatraApp)
 
-	dagger.SyncParallelOutput(func() { suite.Run(t) })
+	defer AfterSuite(t)
+	suite.Run(t)
+}
+
+func AfterSuite(t *testing.T) {
+	var Expect = NewWithT(t).Expect
+
+	Expect(dagger.DeleteBuildpack(rackupBuildpack)).To(Succeed())
+	Expect(dagger.DeleteBuildpack(mriBuildpack)).To(Succeed())
+	Expect(dagger.DeleteBuildpack(bundlerBuildpack)).To(Succeed())
+	Expect(dagger.DeleteBuildpack(bundleInstallBuildpack)).To(Succeed())
 }
 
 func ContainerLogs(id string) func() string {
