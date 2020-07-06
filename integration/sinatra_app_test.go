@@ -66,7 +66,7 @@ func testSinatraApp(t *testing.T, context spec.G, it spec.S) {
 			container, err = docker.Container.Run.WithEnv(map[string]string{"PORT": "8088"}).Execute(image.ID)
 			Expect(err).NotTo(HaveOccurred())
 
-			Eventually(container).Should(BeAvailable(), ContainerLogs(container.ID))
+			Eventually(container).Should(BeAvailable())
 
 			_, exists := container.Ports["8088"]
 			Expect(exists).To(BeTrue())
