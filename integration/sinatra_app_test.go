@@ -58,7 +58,12 @@ func testSinatraApp(t *testing.T, context spec.G, it spec.S) {
 
 			var logs fmt.Stringer
 			image, logs, err = pack.WithNoColor().Build.
-				WithBuildpacks(mriBuildpack, bundlerBuildpack, bundleInstallBuildpack, rackupBuildpack).
+				WithBuildpacks(
+					settings.Buildpacks.MRI.Online,
+					settings.Buildpacks.Bundler.Online,
+					settings.Buildpacks.BundleInstall.Online,
+					settings.Buildpacks.Rackup.Online,
+				).
 				WithNoPull().
 				Execute(name, source)
 			Expect(err).NotTo(HaveOccurred(), logs.String())
@@ -81,11 +86,8 @@ func testSinatraApp(t *testing.T, context spec.G, it spec.S) {
 			Expect(err).NotTo(HaveOccurred())
 			Expect(string(content)).To(ContainSubstring("Hello world!"))
 
-			buildpackVersion, err := GetGitVersion()
-			Expect(err).NotTo(HaveOccurred())
-
 			Expect(logs).To(ContainLines(
-				fmt.Sprintf("Rackup Buildpack %s", buildpackVersion),
+				"Rackup Buildpack 1.2.3",
 				"  Writing start command",
 				`    bundle exec rackup -p "${PORT:-9292}"`,
 			))
