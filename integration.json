@@ -1,0 +1,5 @@
+{
+  "mri": "github.com/paketo-community/mri",
+  "bundler": "github.com/paketo-community/bundler",
+  "bundle-install": "github.com/paketo-community/bundle-install"
+}
