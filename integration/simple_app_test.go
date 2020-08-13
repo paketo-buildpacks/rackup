@@ -88,7 +88,7 @@ func testSimpleApp(t *testing.T, context spec.G, it spec.S) {
 				Expect(string(content)).To(ContainSubstring("Hello world!"))
 
 				Expect(logs).To(ContainLines(
-					"Rackup Buildpack 1.2.3",
+					"Paketo Rackup Buildpack 1.2.3",
 					"  Writing start command",
 					`    bundle exec rackup -p "${PORT:-9292}"`,
 				))
@@ -129,7 +129,7 @@ func testSimpleApp(t *testing.T, context spec.G, it spec.S) {
 				Expect(string(content)).To(ContainSubstring("Hello world!"))
 
 				Expect(logs).To(ContainLines(
-					"Rackup Buildpack 1.2.3",
+					"Paketo Rackup Buildpack 1.2.3",
 					"  Writing start command",
 					`    bundle exec rackup -p "${PORT:-9292}"`,
 				))
