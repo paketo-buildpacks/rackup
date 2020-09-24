@@ -1,8 +1,9 @@
 api = "0.2"
 
 [buildpack]
-  id = "paketo-community/rackup"
+  id = "paketo-buildpacks/rackup"
   name = "Paketo Rackup Buildpack"
+  homepage = "https://github.com/paketo-buildpacks/rackup"
 
 [metadata]
   include_files = ["bin/run", "bin/build","bin/detect","buildpack.toml"]

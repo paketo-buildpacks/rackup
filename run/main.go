@@ -5,7 +5,7 @@ import (
 
 	"github.com/paketo-buildpacks/packit"
 	"github.com/paketo-buildpacks/packit/scribe"
-	"github.com/paketo-community/rackup"
+	"github.com/paketo-buildpacks/rackup"
 )
 
 func main() {

@@ -8,7 +8,7 @@ import (
 
 	"github.com/paketo-buildpacks/packit"
 	"github.com/paketo-buildpacks/packit/scribe"
-	"github.com/paketo-community/rackup"
+	"github.com/paketo-buildpacks/rackup"
 	"github.com/sclevine/spec"
 
 	. "github.com/onsi/gomega"

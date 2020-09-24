@@ -8,8 +8,8 @@ import (
 	"testing"
 
 	"github.com/paketo-buildpacks/packit"
-	"github.com/paketo-community/rackup"
-	"github.com/paketo-community/rackup/fakes"
+	"github.com/paketo-buildpacks/rackup"
+	"github.com/paketo-buildpacks/rackup/fakes"
 	"github.com/sclevine/spec"
 
 	. "github.com/onsi/gomega"
