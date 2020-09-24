@@ -1,4 +1,4 @@
-module github.com/paketo-community/rackup
+module github.com/paketo-buildpacks/rackup
 
 go 1.14
 

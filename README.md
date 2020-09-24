@@ -1,6 +1,6 @@
 # Rackup Cloud Native Buildpack
 
-## `gcr.io/paketo-community/rackup`
+## `gcr.io/paketo-buildpacks/rackup`
 
 The Rackup CNB sets the start command for a given rack-compliant ruby application.
 

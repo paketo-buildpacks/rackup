@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/paketo-community/rackup"
+	"github.com/paketo-buildpacks/rackup"
 	"github.com/sclevine/spec"
 
 	. "github.com/onsi/gomega"
