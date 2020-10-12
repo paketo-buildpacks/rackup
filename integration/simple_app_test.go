@@ -85,7 +85,7 @@ func testSimpleApp(t *testing.T, context spec.G, it spec.S) {
 
 				content, err := ioutil.ReadAll(response.Body)
 				Expect(err).NotTo(HaveOccurred())
-				Expect(string(content)).To(ContainSubstring("Hello world!"))
+				Expect(string(content)).To(Equal("Hello world!"))
 
 				Expect(logs).To(ContainLines(
 					MatchRegexp(fmt.Sprintf(`%s \d+\.\d+\.\d+`, settings.Buildpack.Name)),
