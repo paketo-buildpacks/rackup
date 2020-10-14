@@ -64,7 +64,7 @@ func testSinatraApp(t *testing.T, context spec.G, it spec.S) {
 					settings.Buildpacks.BundleInstall.Online,
 					settings.Buildpacks.Rackup.Online,
 				).
-				WithNoPull().
+				WithPullPolicy("never").
 				Execute(name, source)
 			Expect(err).NotTo(HaveOccurred(), logs.String())
 
