@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"os"
 	"path/filepath"
 	"testing"
 
@@ -15,7 +14,7 @@ import (
 	. "github.com/paketo-buildpacks/occam/matchers"
 )
 
-func testSimpleApp(t *testing.T, context spec.G, it spec.S) {
+func testConfigPortApp(t *testing.T, context spec.G, it spec.S) {
 	var (
 		Expect     = NewWithT(t).Expect
 		Eventually = NewWithT(t).Eventually
@@ -45,16 +44,16 @@ func testSimpleApp(t *testing.T, context spec.G, it spec.S) {
 		})
 
 		it.After(func() {
-			Expect(docker.Container.Remove.Execute(container.ID)).To(Succeed())
-			Expect(docker.Image.Remove.Execute(image.ID)).To(Succeed())
-			Expect(docker.Volume.Remove.Execute(occam.CacheVolumeNames(name))).To(Succeed())
-			Expect(os.RemoveAll(source)).To(Succeed())
+			// Expect(docker.Container.Remove.Execute(container.ID)).To(Succeed())
+			// Expect(docker.Image.Remove.Execute(image.ID)).To(Succeed())
+			// Expect(docker.Volume.Remove.Execute(occam.CacheVolumeNames(name))).To(Succeed())
+			// Expect(os.RemoveAll(source)).To(Succeed())
 		})
 
-		context("a container port is specified via environment variable", func() {
-			it("creates a working OCI image with a rackup start command", func() {
+		context("a container port is specified via config.ru file only", func() {
+			it.Focus("creates a working OCI image with a rackup start command and the port set in config.ru", func() {
 				var err error
-				source, err = occam.Source(filepath.Join("testdata", "simple_app"))
+				source, err = occam.Source(filepath.Join("testdata", "config_port_app"))
 				Expect(err).NotTo(HaveOccurred())
 
 				var logs fmt.Stringer
@@ -70,62 +69,13 @@ func testSimpleApp(t *testing.T, context spec.G, it spec.S) {
 				Expect(err).NotTo(HaveOccurred(), logs.String())
 
 				container, err = docker.Container.Run.
-					WithEnv(map[string]string{"PORT": "8088"}).
-					WithPublish("8088").
-					WithPublishAll().
+					WithBindport("3000").
 					Execute(image.ID)
 				Expect(err).NotTo(HaveOccurred())
 
 				Eventually(container).Should(BeAvailable())
 
-				_, exists := container.Ports["8088"]
-				Expect(exists).To(BeTrue())
-
-				response, err := http.Get(fmt.Sprintf("http://localhost:%s", container.HostPort("8088")))
-				Expect(err).NotTo(HaveOccurred())
-				defer response.Body.Close()
-
-				Expect(response.StatusCode).To(Equal(http.StatusOK))
-
-				content, err := ioutil.ReadAll(response.Body)
-				Expect(err).NotTo(HaveOccurred())
-				Expect(string(content)).To(Equal("Hello world!"))
-
-				Expect(logs).To(ContainLines(
-					MatchRegexp(fmt.Sprintf(`%s \d+\.\d+\.\d+`, settings.Buildpack.Name)),
-					"  Writing start command",
-					`    if [[ -z "${PORT}" ]]; then bundle exec rackup --env RACK_ENV=production config.ru; else bundle exec rackup --env RACK_ENV=production -p "${PORT}"; fi`,
-				))
-			})
-		})
-
-		context("no container port is specified", func() {
-			it("creates a working OCI image with a rackup start command with the default port 9292", func() {
-				var err error
-				source, err = occam.Source(filepath.Join("testdata", "simple_app"))
-				Expect(err).NotTo(HaveOccurred())
-
-				var logs fmt.Stringer
-				image, logs, err = pack.WithNoColor().Build.
-					WithBuildpacks(
-						settings.Buildpacks.MRI.Online,
-						settings.Buildpacks.Bundler.Online,
-						settings.Buildpacks.BundleInstall.Online,
-						settings.Buildpacks.Rackup.Online,
-					).
-					WithPullPolicy("never").
-					Execute(name, source)
-				Expect(err).NotTo(HaveOccurred(), logs.String())
-
-				container, err = docker.Container.Run.
-					WithPublish("9292").
-					WithPublishAll().
-					Execute(image.ID)
-				Expect(err).NotTo(HaveOccurred())
-
-				Eventually(container).Should(BeAvailable())
-
-				response, err := http.Get(fmt.Sprintf("http://localhost:%s", container.HostPort("9292")))
+				response, err := http.Get(fmt.Sprintf("http://localhost:%s", container.HostPort()))
 				Expect(err).NotTo(HaveOccurred())
 				defer response.Body.Close()
 
@@ -140,6 +90,66 @@ func testSimpleApp(t *testing.T, context spec.G, it spec.S) {
 					"  Writing start command",
 					`    if [[ -z "${PORT}" ]]; then bundle exec rackup --env RACK_ENV=production config.ru; else bundle exec rackup --env RACK_ENV=production -p "${PORT}"; fi`,
 				))
+
+				Eventually(func() string {
+					cLogs, err := docker.Container.Logs.Execute(container.ID)
+					Expect(err).NotTo(HaveOccurred())
+					return cLogs.String()
+				}).Should(
+					MatchRegexp(`INFO  WEBrick::HTTPServer#start: pid=\d+ port=3000`),
+				)
+			})
+		})
+
+		context("a container port is specified via $PORT environment variable AND config.ru file", func() {
+			it("creates a working OCI image with a rackup start command using $PORT as the port", func() {
+				var err error
+				source, err = occam.Source(filepath.Join("testdata", "config_port_app"))
+				Expect(err).NotTo(HaveOccurred())
+
+				var logs fmt.Stringer
+				image, logs, err = pack.WithNoColor().Build.
+					WithBuildpacks(
+						settings.Buildpacks.MRI.Online,
+						settings.Buildpacks.Bundler.Online,
+						settings.Buildpacks.BundleInstall.Online,
+						settings.Buildpacks.Rackup.Online,
+					).
+					WithPullPolicy("never").
+					Execute(name, source)
+				Expect(err).NotTo(HaveOccurred(), logs.String())
+
+				container, err = docker.Container.Run.WithEnv(map[string]string{"PORT": "8088"}).Execute(image.ID)
+				Expect(err).NotTo(HaveOccurred())
+
+				Eventually(container).Should(BeAvailable())
+
+				_, exists := container.Ports["8088"]
+				Expect(exists).To(BeTrue())
+
+				response, err := http.Get(fmt.Sprintf("http://localhost:%s", container.HostPort()))
+				Expect(err).NotTo(HaveOccurred())
+				defer response.Body.Close()
+
+				Expect(response.StatusCode).To(Equal(http.StatusOK))
+
+				content, err := ioutil.ReadAll(response.Body)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(string(content)).To(Equal("Hello world!"))
+
+				Expect(logs).To(ContainLines(
+					MatchRegexp(fmt.Sprintf(`%s \d+\.\d+\.\d+`, settings.Buildpack.Name)),
+					"  Writing start command",
+					`    if [[ -z "${PORT}" ]]; then bundle exec rackup --env RACK_ENV=production config.ru; else bundle exec rackup --env RACK_ENV=production -p "${PORT}"; fi`,
+				))
+
+				Eventually(func() string {
+					cLogs, err := docker.Container.Logs.Execute(container.ID)
+					Expect(err).NotTo(HaveOccurred())
+					return cLogs.String()
+				}).Should(
+					MatchRegexp(`INFO  WEBrick::HTTPServer#start: pid=\d+ port=8088`),
+				)
 			})
 		})
 	})

@@ -86,6 +86,7 @@ func TestIntegration(t *testing.T) {
 	suite := spec.New("Integration", spec.Parallel(), spec.Report(report.Terminal{}))
 	suite("SimpleApp", testSimpleApp)
 	suite("SinatraApp", testSinatraApp)
+	suite("ConfigPortApp", testConfigPortApp)
 
 	suite.Run(t)
 }
