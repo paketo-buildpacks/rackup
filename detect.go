@@ -1,6 +1,7 @@
 package rackup
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -27,7 +28,7 @@ func Detect(parser GemParser) packit.DetectFunc {
 		if !rackFound {
 			_, err = os.Stat(filepath.Join(context.WorkingDir, "config.ru"))
 			if err != nil {
-				if os.IsNotExist(err) {
+				if errors.Is(err, os.ErrNotExist) {
 					return packit.DetectResult{}, packit.Fail
 				}
 				return packit.DetectResult{}, fmt.Errorf("failed to stat config.ru: %w", err)

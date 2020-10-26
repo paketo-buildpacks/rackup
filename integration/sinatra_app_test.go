@@ -29,7 +29,7 @@ func testSinatraApp(t *testing.T, context spec.G, it spec.S) {
 		docker = occam.NewDocker()
 	})
 
-	context("when building a rack-compliant sinatra app", func() {
+	context("when building a rack-compliant sinatra app with a user defined PORT variable", func() {
 		var (
 			image     occam.Image
 			container occam.Container
@@ -93,7 +93,7 @@ func testSinatraApp(t *testing.T, context spec.G, it spec.S) {
 			Expect(logs).To(ContainLines(
 				MatchRegexp(fmt.Sprintf(`%s \d+\.\d+\.\d+`, settings.Buildpack.Name)),
 				"  Writing start command",
-				`    bundle exec rackup -p "${PORT:-9292}"`,
+				`    if [[ -z "${PORT}" ]]; then bundle exec rackup --env RACK_ENV=production config.ru; else bundle exec rackup --env RACK_ENV=production -p "${PORT}"; fi`,
 			))
 		})
 	})
