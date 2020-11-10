@@ -93,7 +93,7 @@ func testSinatraApp(t *testing.T, context spec.G, it spec.S) {
 			Expect(logs).To(ContainLines(
 				MatchRegexp(fmt.Sprintf(`%s \d+\.\d+\.\d+`, settings.Buildpack.Name)),
 				"  Writing start command",
-				`    if [[ -z "${PORT}" ]]; then bundle exec rackup --env RACK_ENV=production config.ru; else bundle exec rackup --env RACK_ENV=production -p "${PORT}"; fi`,
+				`    bundle exec rackup --env RACK_ENV=production -p "${PORT:-9292}"`,
 			))
 		})
 	})
