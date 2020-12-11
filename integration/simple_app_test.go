@@ -69,7 +69,11 @@ func testSimpleApp(t *testing.T, context spec.G, it spec.S) {
 					Execute(name, source)
 				Expect(err).NotTo(HaveOccurred(), logs.String())
 
-				container, err = docker.Container.Run.WithEnv(map[string]string{"PORT": "8088"}).Execute(image.ID)
+				container, err = docker.Container.Run.
+					WithEnv(map[string]string{"PORT": "8088"}).
+					WithPublish("8088").
+					WithPublishAll().
+					Execute(image.ID)
 				Expect(err).NotTo(HaveOccurred())
 
 				Eventually(container).Should(BeAvailable())
@@ -77,7 +81,7 @@ func testSimpleApp(t *testing.T, context spec.G, it spec.S) {
 				_, exists := container.Ports["8088"]
 				Expect(exists).To(BeTrue())
 
-				response, err := http.Get(fmt.Sprintf("http://localhost:%s", container.HostPort()))
+				response, err := http.Get(fmt.Sprintf("http://localhost:%s", container.HostPort("8088")))
 				Expect(err).NotTo(HaveOccurred())
 				defer response.Body.Close()
 
@@ -113,12 +117,15 @@ func testSimpleApp(t *testing.T, context spec.G, it spec.S) {
 					Execute(name, source)
 				Expect(err).NotTo(HaveOccurred(), logs.String())
 
-				container, err = docker.Container.Run.Execute(image.ID)
+				container, err = docker.Container.Run.
+					WithPublish("9292").
+					WithPublishAll().
+					Execute(image.ID)
 				Expect(err).NotTo(HaveOccurred())
 
 				Eventually(container).Should(BeAvailable())
 
-				response, err := http.Get(fmt.Sprintf("http://localhost:%s", container.HostPort()))
+				response, err := http.Get(fmt.Sprintf("http://localhost:%s", container.HostPort("9292")))
 				Expect(err).NotTo(HaveOccurred())
 				defer response.Body.Close()
 
