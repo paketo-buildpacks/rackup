@@ -51,7 +51,6 @@ func testConfigPortApp(t *testing.T, context spec.G, it spec.S) {
 			Expect(os.RemoveAll(source)).To(Succeed())
 		})
 
-		// This test is failing due to the inability to not set a default $PORT in occam. To get this case pass we would need to add bindPort logic to occam.
 		context("a container port is specified via config.ru file only", func() {
 			it("creates a working OCI image with a rackup start command and the port set in config.ru", func() {
 				var err error
@@ -70,12 +69,15 @@ func testConfigPortApp(t *testing.T, context spec.G, it spec.S) {
 					Execute(name, source)
 				Expect(err).NotTo(HaveOccurred(), logs.String())
 
-				container, err = docker.Container.Run.Execute(image.ID)
+				container, err = docker.Container.Run.
+					WithPublish("3000").
+					WithPublishAll().
+					Execute(image.ID)
 				Expect(err).NotTo(HaveOccurred())
 
 				Eventually(container).Should(BeAvailable())
 
-				response, err := http.Get(fmt.Sprintf("http://localhost:%s", container.HostPort()))
+				response, err := http.Get(fmt.Sprintf("http://localhost:%s", container.HostPort("3000")))
 				Expect(err).NotTo(HaveOccurred())
 				defer response.Body.Close()
 
@@ -119,7 +121,12 @@ func testConfigPortApp(t *testing.T, context spec.G, it spec.S) {
 					Execute(name, source)
 				Expect(err).NotTo(HaveOccurred(), logs.String())
 
-				container, err = docker.Container.Run.WithEnv(map[string]string{"PORT": "8088"}).Execute(image.ID)
+				container, err = docker.Container.Run.
+					WithEnv(map[string]string{"PORT": "8088"}).
+					WithPublish("8088").
+					WithPublish("3000").
+					WithPublishAll().
+					Execute(image.ID)
 				Expect(err).NotTo(HaveOccurred())
 
 				Eventually(container).Should(BeAvailable())
@@ -127,7 +134,7 @@ func testConfigPortApp(t *testing.T, context spec.G, it spec.S) {
 				_, exists := container.Ports["8088"]
 				Expect(exists).To(BeTrue())
 
-				response, err := http.Get(fmt.Sprintf("http://localhost:%s", container.HostPort()))
+				response, err := http.Get(fmt.Sprintf("http://localhost:%s", container.HostPort("8088")))
 				Expect(err).NotTo(HaveOccurred())
 				defer response.Body.Close()
 
