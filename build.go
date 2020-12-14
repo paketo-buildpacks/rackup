@@ -39,7 +39,8 @@ func Build(logger scribe.Logger) packit.BuildFunc {
 		if configPort {
 			reg, _ := regexp.Compile(`(-p|--port) \d+`)
 			portString := reg.FindString(string(configru))
-			fallbackPort = strings.TrimLeft(portString, "(--port|-p) ")
+			// Trim off the --port or -p part from the string
+			fallbackPort = strings.Trim(portString, "-port ")
 		}
 
 		// Use RACK_ENV=production since Rack v1.6.0+ defaults the host to local host in development mode (default)
