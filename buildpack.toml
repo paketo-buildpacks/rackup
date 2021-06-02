@@ -1,12 +1,12 @@
 api = "0.2"
 
 [buildpack]
+  homepage = "https://github.com/paketo-buildpacks/rackup"
   id = "paketo-buildpacks/rackup"
   name = "Paketo Rackup Buildpack"
-  homepage = "https://github.com/paketo-buildpacks/rackup"
 
 [metadata]
-  include-files = ["bin/run", "bin/build","bin/detect","buildpack.toml"]
+  include-files = ["bin/run", "bin/build", "bin/detect", "buildpack.toml"]
   pre-package = "./scripts/build.sh"
 
 [[stacks]]
