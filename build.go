@@ -2,7 +2,6 @@ package rackup
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -24,7 +23,7 @@ func Build(logger scribe.Logger) packit.BuildFunc {
 		}
 
 		// check if the config.ru file specifies a port
-		configru, err := ioutil.ReadFile(filepath.Join(context.WorkingDir, "config.ru"))
+		configru, err := os.ReadFile(filepath.Join(context.WorkingDir, "config.ru"))
 		if err != nil {
 			return packit.BuildResult{}, fmt.Errorf("failed to read config.ru: %w", err)
 		}
@@ -57,6 +56,7 @@ func Build(logger scribe.Logger) packit.BuildFunc {
 					{
 						Type:    "web",
 						Command: command,
+						Default: true,
 					},
 				},
 			},
