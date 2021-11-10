@@ -1,7 +1,6 @@
 package rackup_test
 
 import (
-	"io/ioutil"
 	"os"
 	"testing"
 
@@ -20,7 +19,7 @@ func testGemfileLockParser(t *testing.T, context spec.G, it spec.S) {
 	)
 
 	it.Before(func() {
-		file, err := ioutil.TempFile("", "Gemfile.lock")
+		file, err := os.CreateTemp("", "Gemfile.lock")
 		Expect(err).NotTo(HaveOccurred())
 		defer file.Close()
 

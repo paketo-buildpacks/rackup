@@ -2,7 +2,6 @@ package rackup_test
 
 import (
 	"bytes"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -29,13 +28,13 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 	it.Before(func() {
 		var err error
-		layersDir, err = ioutil.TempDir("", "layers")
+		layersDir, err = os.MkdirTemp("", "layers")
 		Expect(err).NotTo(HaveOccurred())
 
-		cnbDir, err = ioutil.TempDir("", "cnb")
+		cnbDir, err = os.MkdirTemp("", "cnb")
 		Expect(err).NotTo(HaveOccurred())
 
-		workingDir, err = ioutil.TempDir("", "working-dir")
+		workingDir, err = os.MkdirTemp("", "working-dir")
 		Expect(err).NotTo(HaveOccurred())
 
 		buffer = bytes.NewBuffer(nil)
@@ -52,9 +51,10 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 	context("when there is a config.ru file that doesn't specify a port", func() {
 		it.Before(func() {
-			err := ioutil.WriteFile(filepath.Join(workingDir, "config.ru"), []byte{}, 0644)
+			err := os.WriteFile(filepath.Join(workingDir, "config.ru"), []byte{}, 0600)
 			Expect(err).NotTo(HaveOccurred())
 		})
+
 		it("returns a result that provides a start command that uses $PORT", func() {
 			result, err := build(packit.BuildContext{
 				WorkingDir: workingDir,
@@ -81,6 +81,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 						{
 							Type:    "web",
 							Command: `bundle exec rackup --env RACK_ENV=production -p "${PORT:-9292}"`,
+							Default: true,
 						},
 					},
 				},
@@ -93,9 +94,10 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 	context("when there is a config.ru file that specifies a port via -p", func() {
 		it.Before(func() {
-			err := ioutil.WriteFile(filepath.Join(workingDir, "config.ru"), []byte(`#\ -o 0.0.0.0 -p 3000`), 0644)
+			err := os.WriteFile(filepath.Join(workingDir, "config.ru"), []byte(`#\ -o 0.0.0.0 -p 3000`), 0600)
 			Expect(err).NotTo(HaveOccurred())
 		})
+
 		it("returns a result that provides a start command that looks in the config.ru file for port configurations", func() {
 			result, err := build(packit.BuildContext{
 				WorkingDir: workingDir,
@@ -122,6 +124,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 						{
 							Type:    "web",
 							Command: `bundle exec rackup --env RACK_ENV=production -p "${PORT:-3000}"`,
+							Default: true,
 						},
 					},
 				},
@@ -134,9 +137,10 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 	context("when there is a config.ru file that specifies a port via --port", func() {
 		it.Before(func() {
-			err := ioutil.WriteFile(filepath.Join(workingDir, "config.ru"), []byte(`#\ --port 3000`), 0644)
+			err := os.WriteFile(filepath.Join(workingDir, "config.ru"), []byte(`#\ --port 3000`), 0600)
 			Expect(err).NotTo(HaveOccurred())
 		})
+
 		it("returns a result that provides a start command that looks in the config.ru file for port configurations", func() {
 			result, err := build(packit.BuildContext{
 				WorkingDir: workingDir,
@@ -163,6 +167,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 						{
 							Type:    "web",
 							Command: `bundle exec rackup --env RACK_ENV=production -p "${PORT:-3000}"`,
+							Default: true,
 						},
 					},
 				},
@@ -172,6 +177,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			Expect(buffer.String()).To(ContainSubstring("Writing start command"))
 		})
 	})
+
 	context("failure cases", func() {
 		context("when unable to stat config.ru", func() {
 			it.Before(func() {
