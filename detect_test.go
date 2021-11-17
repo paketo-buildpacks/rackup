@@ -2,7 +2,6 @@ package rackup_test
 
 import (
 	"errors"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -26,13 +25,13 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 
 	it.Before(func() {
 		var err error
-		workingDir, err = ioutil.TempDir("", "working-dir")
+		workingDir, err = os.MkdirTemp("", "working-dir")
 		Expect(err).NotTo(HaveOccurred())
 
-		err = ioutil.WriteFile(filepath.Join(workingDir, "Gemfile"), []byte{}, 0644)
+		err = os.WriteFile(filepath.Join(workingDir, "Gemfile"), nil, 0600)
 		Expect(err).NotTo(HaveOccurred())
 
-		err = ioutil.WriteFile(filepath.Join(workingDir, "config.ru"), []byte{}, 0644)
+		err = os.WriteFile(filepath.Join(workingDir, "config.ru"), nil, 0600)
 		Expect(err).NotTo(HaveOccurred())
 
 		gemfileLockParser = &fakes.GemParser{}
