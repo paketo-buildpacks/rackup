@@ -1,9 +1,15 @@
 api = "0.6"
 
 [buildpack]
+  description = "A buildpack for starting a rackup server for a Ruby app"
   homepage = "https://github.com/paketo-buildpacks/rackup"
   id = "paketo-buildpacks/rackup"
+  keywords = ["ruby", "rackup"]
   name = "Paketo Rackup Buildpack"
+
+  [[buildpack.licenses]]
+    type = "Apache-2.0"
+    uri = "https://github.com/paketo-buildpacks/rackup/blob/main/LICENSE"
 
 [metadata]
   include-files = ["bin/run", "bin/build", "bin/detect", "buildpack.toml"]
