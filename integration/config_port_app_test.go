@@ -63,6 +63,7 @@ func testConfigPortApp(t *testing.T, context spec.G, it spec.S) {
 						settings.Buildpacks.BundleInstall.Online,
 						settings.Buildpacks.Rackup.Online,
 					).
+					WithEnv(map[string]string{"BP_LOG_LEVEL": "DEBUG"}).
 					WithPullPolicy("never").
 					Execute(name, source)
 				Expect(err).NotTo(HaveOccurred(), logs.String())
@@ -79,7 +80,11 @@ func testConfigPortApp(t *testing.T, context spec.G, it spec.S) {
 				Expect(logs).To(ContainLines(
 					MatchRegexp(fmt.Sprintf(`%s \d+\.\d+\.\d+`, settings.Buildpack.Name)),
 					"  Writing start command",
-					`    bundle exec rackup --env RACK_ENV=production -p "${PORT:-3000}"`,
+					"  Checking the config.ru file",
+					"    config.ru specifies a port: 3000",
+					"",
+					"  Assigning launch processes:",
+					`    web (default): bash -c bundle exec rackup --env RACK_ENV=production -p "${PORT:-3000}"`,
 				))
 
 				Eventually(func() string {
@@ -127,7 +132,8 @@ func testConfigPortApp(t *testing.T, context spec.G, it spec.S) {
 				Expect(logs).To(ContainLines(
 					MatchRegexp(fmt.Sprintf(`%s \d+\.\d+\.\d+`, settings.Buildpack.Name)),
 					"  Writing start command",
-					`    bundle exec rackup --env RACK_ENV=production -p "${PORT:-3000}"`,
+					"  Assigning launch processes:",
+					`    web (default): bash -c bundle exec rackup --env RACK_ENV=production -p "${PORT:-3000}"`,
 				))
 
 				Eventually(func() string {

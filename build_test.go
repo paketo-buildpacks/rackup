@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/paketo-buildpacks/packit"
-	"github.com/paketo-buildpacks/packit/scribe"
+	"github.com/paketo-buildpacks/packit/v2"
+	"github.com/paketo-buildpacks/packit/v2/scribe"
 	"github.com/paketo-buildpacks/rackup"
 	"github.com/sclevine/spec"
 
@@ -38,7 +38,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		Expect(err).NotTo(HaveOccurred())
 
 		buffer = bytes.NewBuffer(nil)
-		logger := scribe.NewLogger(buffer)
+		logger := scribe.NewEmitter(buffer)
 
 		build = rackup.Build(logger)
 	})
@@ -80,8 +80,10 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 					Processes: []packit.Process{
 						{
 							Type:    "web",
-							Command: `bundle exec rackup --env RACK_ENV=production -p "${PORT:-9292}"`,
+							Command: "bash",
+							Args:    []string{"-c", `bundle exec rackup --env RACK_ENV=production -p "${PORT:-9292}"`},
 							Default: true,
+							Direct:  true,
 						},
 					},
 				},
@@ -123,8 +125,10 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 					Processes: []packit.Process{
 						{
 							Type:    "web",
-							Command: `bundle exec rackup --env RACK_ENV=production -p "${PORT:-3000}"`,
+							Command: "bash",
+							Args:    []string{"-c", `bundle exec rackup --env RACK_ENV=production -p "${PORT:-3000}"`},
 							Default: true,
+							Direct:  true,
 						},
 					},
 				},
@@ -166,8 +170,10 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 					Processes: []packit.Process{
 						{
 							Type:    "web",
-							Command: `bundle exec rackup --env RACK_ENV=production -p "${PORT:-3000}"`,
+							Command: "bash",
+							Args:    []string{"-c", `bundle exec rackup --env RACK_ENV=production -p "${PORT:-3000}"`},
 							Default: true,
+							Direct:  true,
 						},
 					},
 				},
