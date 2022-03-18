@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/paketo-buildpacks/packit"
+	"github.com/paketo-buildpacks/packit/v2"
 	"github.com/paketo-buildpacks/rackup"
 	"github.com/paketo-buildpacks/rackup/fakes"
 	"github.com/sclevine/spec"
