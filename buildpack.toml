@@ -5,7 +5,7 @@ api = "0.7"
   homepage = "https://github.com/paketo-buildpacks/rackup"
   id = "paketo-buildpacks/rackup"
   keywords = ["ruby", "rackup"]
-  name = "Paketo Rackup Buildpack"
+  name = "Paketo Buildpack for Rackup"
 
   [[buildpack.licenses]]
     type = "Apache-2.0"
