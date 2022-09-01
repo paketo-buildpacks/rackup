@@ -1,4 +1,4 @@
-# Rackup Cloud Native Buildpack
+# Paketo Buildpack for Rackup
 
 ## `gcr.io/paketo-buildpacks/rackup`
 
