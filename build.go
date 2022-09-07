@@ -28,20 +28,18 @@ func Build(logger scribe.Emitter) packit.BuildFunc {
 		if err != nil {
 			return packit.BuildResult{}, fmt.Errorf("failed to read config.ru: %w", err)
 		}
-		configPort, err := regexp.MatchString(`#\\.*?(-p|--port) \d+`, string(configru))
-		if err != nil {
-			return packit.BuildResult{}, fmt.Errorf("failed to parse contents of config.ru: %w", err)
-		}
 
-		fallbackPort := "9292"
+		port := "9292"
+		matches := regexp.MustCompile(`(?m)[\r\n]*^.*#\\.*?(-p|--port) (\d+).*$`).FindStringSubmatch(string(configru))
+		if len(matches) == 3 {
+			port = matches[2]
+			logger.Debug.Subprocess("config.ru specifies a port: %s", port)
 
-		// if config.ru specifies a port, just parse out the port number
-		if configPort {
-			reg, _ := regexp.Compile(`(-p|--port) \d+`)
-			portString := reg.FindString(string(configru))
-			// Trim off the --port or -p part from the string
-			fallbackPort = strings.Trim(portString, "-port ")
-			logger.Debug.Subprocess("config.ru specifies a port: %s", fallbackPort)
+			content := strings.Replace(string(configru), matches[0], "", 1)
+			err = os.WriteFile(filepath.Join(context.WorkingDir, "config.ru"), []byte(content), 0600)
+			if err != nil {
+				return packit.BuildResult{}, fmt.Errorf("failed to rewrite config.ru: %w", err)
+			}
 		}
 		logger.Debug.Break()
 
@@ -50,7 +48,7 @@ func Build(logger scribe.Emitter) packit.BuildFunc {
 		// 1. the $PORT variable if it is set
 		// 2. A port listed in config.ru with the -p or --port flag
 		// 3. 1 and 2 are not met, and the fallback port is set to the default of 9292.
-		args := fmt.Sprintf(`bundle exec rackup --env RACK_ENV=production -p "${PORT:-%s}"`, fallbackPort)
+		args := fmt.Sprintf(`bundle exec rackup --env RACK_ENV=production -p "${PORT:-%s}"`, port)
 		processes := []packit.Process{
 			{
 				Type:    "web",
