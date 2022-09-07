@@ -96,7 +96,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 	context("when there is a config.ru file that specifies a port via -p", func() {
 		it.Before(func() {
-			err := os.WriteFile(filepath.Join(workingDir, "config.ru"), []byte(`#\ -o 0.0.0.0 -p 3000`), 0600)
+			err := os.WriteFile(filepath.Join(workingDir, "config.ru"), []byte("#some-comment\n#\\ -o 0.0.0.0 -p 3000\n#other-comment"), 0600)
 			Expect(err).NotTo(HaveOccurred())
 		})
 
@@ -136,6 +136,10 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 			Expect(buffer.String()).To(ContainSubstring("Some Buildpack some-version"))
 			Expect(buffer.String()).To(ContainSubstring("Writing start command"))
+
+			content, err := os.ReadFile(filepath.Join(workingDir, "config.ru"))
+			Expect(err).NotTo(HaveOccurred())
+			Expect(string(content)).To(Equal("#some-comment\n#other-comment"))
 		})
 	})
 
@@ -209,6 +213,30 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 					Layers: packit.Layers{Path: layersDir},
 				})
 				Expect(err).To(MatchError(ContainSubstring("failed to stat config.ru")))
+			})
+		})
+
+		context("when unable to write config.ru", func() {
+			it.Before(func() {
+				err := os.WriteFile(filepath.Join(workingDir, "config.ru"), []byte(`#\ --port 3000`), 0400)
+				Expect(err).NotTo(HaveOccurred())
+			})
+
+			it("returns an error", func() {
+				_, err := build(packit.BuildContext{
+					WorkingDir: workingDir,
+					CNBPath:    cnbDir,
+					Stack:      "some-stack",
+					BuildpackInfo: packit.BuildpackInfo{
+						Name:    "Some Buildpack",
+						Version: "some-version",
+					},
+					Plan: packit.BuildpackPlan{
+						Entries: []packit.BuildpackPlanEntry{},
+					},
+					Layers: packit.Layers{Path: layersDir},
+				})
+				Expect(err).To(MatchError(ContainSubstring("failed to rewrite config.ru")))
 			})
 		})
 	})
