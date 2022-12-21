@@ -43,12 +43,12 @@ func Build(logger scribe.Emitter) packit.BuildFunc {
 		}
 		logger.Debug.Break()
 
-		// Use RACK_ENV=production since Rack v1.6.0+ defaults the host to local host in development mode (default)
+		// Hardcode `--env production` since Rack v1.6.0+ defaults the host to local host in development mode (default)
 		// The order of precedence in setting the port is:
 		// 1. the $PORT variable if it is set
 		// 2. A port listed in config.ru with the -p or --port flag
 		// 3. 1 and 2 are not met, and the fallback port is set to the default of 9292.
-		args := fmt.Sprintf(`bundle exec rackup --env RACK_ENV=production -p "${PORT:-%s}"`, port)
+		args := fmt.Sprintf(`bundle exec rackup --env %s -p "${PORT:-%s}"`, "production", port)
 		processes := []packit.Process{
 			{
 				Type:    "web",

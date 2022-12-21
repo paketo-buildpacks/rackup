@@ -81,7 +81,7 @@ func testSimpleApp(t *testing.T, context spec.G, it spec.S) {
 					MatchRegexp(fmt.Sprintf(`%s \d+\.\d+\.\d+`, settings.Buildpack.Name)),
 					"  Writing start command",
 					"  Assigning launch processes:",
-					`    web (default): bash -c bundle exec rackup --env RACK_ENV=production -p "${PORT:-9292}"`,
+					`    web (default): bash -c bundle exec rackup --env production -p "${PORT:-9292}"`,
 				))
 			})
 		})
@@ -117,7 +117,7 @@ func testSimpleApp(t *testing.T, context spec.G, it spec.S) {
 					MatchRegexp(fmt.Sprintf(`%s \d+\.\d+\.\d+`, settings.Buildpack.Name)),
 					"  Writing start command",
 					"  Assigning launch processes:",
-					`    web (default): bash -c bundle exec rackup --env RACK_ENV=production -p "${PORT:-9292}"`,
+					`    web (default): bash -c bundle exec rackup --env production -p "${PORT:-9292}"`,
 				))
 			})
 		})

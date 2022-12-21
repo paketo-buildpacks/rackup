@@ -84,7 +84,7 @@ func testConfigPortApp(t *testing.T, context spec.G, it spec.S) {
 					"    config.ru specifies a port: 3000",
 					"",
 					"  Assigning launch processes:",
-					`    web (default): bash -c bundle exec rackup --env RACK_ENV=production -p "${PORT:-3000}"`,
+					`    web (default): bash -c bundle exec rackup --env production -p "${PORT:-3000}"`,
 				))
 
 				Eventually(func() string {
@@ -133,7 +133,7 @@ func testConfigPortApp(t *testing.T, context spec.G, it spec.S) {
 					MatchRegexp(fmt.Sprintf(`%s \d+\.\d+\.\d+`, settings.Buildpack.Name)),
 					"  Writing start command",
 					"  Assigning launch processes:",
-					`    web (default): bash -c bundle exec rackup --env RACK_ENV=production -p "${PORT:-3000}"`,
+					`    web (default): bash -c bundle exec rackup --env production -p "${PORT:-3000}"`,
 				))
 
 				Eventually(func() string {
