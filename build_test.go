@@ -81,7 +81,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 						{
 							Type:    "web",
 							Command: "bash",
-							Args:    []string{"-c", `bundle exec rackup --env RACK_ENV=production -p "${PORT:-9292}"`},
+							Args:    []string{"-c", `bundle exec rackup --env production -p "${PORT:-9292}"`},
 							Default: true,
 							Direct:  true,
 						},
@@ -126,7 +126,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 						{
 							Type:    "web",
 							Command: "bash",
-							Args:    []string{"-c", `bundle exec rackup --env RACK_ENV=production -p "${PORT:-3000}"`},
+							Args:    []string{"-c", `bundle exec rackup --env production -p "${PORT:-3000}"`},
 							Default: true,
 							Direct:  true,
 						},
@@ -175,7 +175,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 						{
 							Type:    "web",
 							Command: "bash",
-							Args:    []string{"-c", `bundle exec rackup --env RACK_ENV=production -p "${PORT:-3000}"`},
+							Args:    []string{"-c", `bundle exec rackup --env production -p "${PORT:-3000}"`},
 							Default: true,
 							Direct:  true,
 						},
