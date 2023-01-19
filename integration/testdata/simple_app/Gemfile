@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-ruby '~> 2.0'
+ruby '~> 3'
 
 gem 'rack', '>= 1.5.1'
 gem 'rackup'
