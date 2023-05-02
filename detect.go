@@ -1,12 +1,11 @@
 package rackup
 
 import (
-	"errors"
 	"fmt"
-	"os"
 	"path/filepath"
 
 	"github.com/paketo-buildpacks/packit/v2"
+	"github.com/paketo-buildpacks/packit/v2/fs"
 )
 
 type BuildPlanMetadata struct {
@@ -26,12 +25,13 @@ func Detect(parser GemParser) packit.DetectFunc {
 		}
 
 		if !rackFound {
-			_, err = os.Stat(filepath.Join(context.WorkingDir, "config.ru"))
+			exists, err := fs.Exists(filepath.Join(context.WorkingDir, "config.ru"))
 			if err != nil {
-				if errors.Is(err, os.ErrNotExist) {
-					return packit.DetectResult{}, packit.Fail
-				}
-				return packit.DetectResult{}, fmt.Errorf("failed to stat config.ru: %w", err)
+				return packit.DetectResult{}, fmt.Errorf("failed to stat 'config.ru': %w", err)
+			}
+
+			if !exists {
+				return packit.DetectResult{}, packit.Fail.WithMessage("no 'config.ru' file found")
 			}
 		}
 
