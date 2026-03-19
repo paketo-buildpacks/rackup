@@ -73,7 +73,6 @@ function run::build() {
         arch=$(echo "${target}" | cut -d'/' -f2)
 
         util::print::title "Building run... for platform: ${platform} and arch: ${arch}"
-          mkdir -p "${platform}/${arch}/bin"
 
         GOOS=$platform \
         GOARCH=$arch \
@@ -117,7 +116,6 @@ function cmd::build() {
 
         if [[ -f "${src}/main.go" ]]; then
           util::print::title "Building ${name}... for platform: ${platform} and arch: ${arch}"
-            mkdir -p "${BUILDPACKDIR}/${platform}/${arch}/bin"
 
           GOOS=$platform \
           GOARCH=$arch \
