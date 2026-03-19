@@ -92,7 +92,7 @@ func testConfigPortApp(t *testing.T, context spec.G, it spec.S) {
 					Expect(err).NotTo(HaveOccurred())
 					return cLogs.String()
 				}).Should(
-					MatchRegexp(`INFO  WEBrick::HTTPServer#start: pid=\d+ port=3000`),
+					MatchRegexp(`INFO  Rackup::Handler::WEBrick::Server#start: pid=\d+ port=3000`),
 				)
 			})
 		})
@@ -141,7 +141,7 @@ func testConfigPortApp(t *testing.T, context spec.G, it spec.S) {
 					Expect(err).NotTo(HaveOccurred())
 					return cLogs.String()
 				}).Should(
-					MatchRegexp(`INFO  WEBrick::HTTPServer#start: pid=\d+ port=8088`),
+					MatchRegexp(`INFO  Rackup::Handler::WEBrick::Server#start: pid=\d+ port=8088`),
 				)
 			})
 		})
