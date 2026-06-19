@@ -1,4 +1,7 @@
 source 'https://rubygems.org'
 
-gem 'sinatra'
+ruby '~> 3'
+
 gem 'rackup'
+gem 'sinatra', '~> 3.0'
+gem 'webrick'

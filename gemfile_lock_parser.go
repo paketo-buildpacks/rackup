@@ -22,7 +22,11 @@ func (p GemfileLockParser) Parse(path string) (bool, error) {
 
 		return false, fmt.Errorf("failed to parse Gemfile.lock: %w", err)
 	}
-	defer file.Close()
+	defer func() {
+		if err := file.Close(); err != nil {
+			fmt.Fprintf(os.Stderr, "failed to close file: %v\n", err)
+		}
+	}()
 
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
